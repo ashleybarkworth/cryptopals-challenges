@@ -1,3 +1,18 @@
+"""
+cryptopals.challenge_one.three
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The hex encoded string:
+
+1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736
+... has been XOR'd against a single character. Find the key, decrypt the message.
+
+You can do this by hand. But don't: write code to do it for you.
+
+How? Devise some method for "scoring" a piece of English plaintext. Character frequency is a good metric. 
+Evaluate each output and choose the one with the best score.
+"""
+
 import string
 import re
 import operator
@@ -39,7 +54,7 @@ FREQUENCY_TABLE = {
 }
 
 
-def get_chi_squared(input: bytes) -> float:
+def get_chi_squared(input: str) -> float:
 	input_len = len(input)
 	input_freqs = {chr(b): input.count(chr(b)) / input_len for b in range(256)}
 

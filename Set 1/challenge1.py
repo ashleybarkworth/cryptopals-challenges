@@ -23,7 +23,7 @@ TEST_STRING = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f6
 TARGET_STRING = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
 
 
-def hex2base64(hex: bytes) -> bytes:
+def hex2base64(hex: str) -> bytes:
 	return b64encode(bytes.fromhex(hex)).decode()
 
 
