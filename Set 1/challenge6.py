@@ -49,59 +49,69 @@ But more people "know how" to break it than can actually break it, and a similar
 
 """
 import operator
+from base64 import b64decode
 from challenge3 import guess_key
 
 
-FILE = "6.txt"
-TEST_ONE = "this is a test"
-TEST_TWO = "wokka wokka!!!"
+def hamming_distance(s1: bytes, s2: bytes) -> int:
+	"""Compute the Hamming distance between two inputs."""
+	assert len(s1) == len(s2)
+	return sum(bin(a ^ b).count("1") for a, b in zip(s1, s2))
 
 
-def hamming(str1: bytes, str2: bytes):
-	return sum(bin(a ^ b).count("1") for a, b in zip(str1, str2))
+def split_into_chunks(text, size):
+	chunks = [
+		text[i:i + size]
+		for i in range(0, len(text), size)
+		if i < len(text) - size
+	]
+	return chunks
 
+
+def guess_keysize(contents):
+
+	distances = []
+	for key_size in range(2, 41):
+		assert key_size < len(contents) / 2
+
+		# Ciphertext broken up into KEYSIZE chunks
+		chunks = split_into_chunks(contents, key_size)
+
+		# First and second blocks of ciphertext
+		blocks = [
+			contents[0:key_size],
+			contents[key_size:key_size * 2]
+		]
+
+		hamming_distances = [
+	    	[hamming_distance(block, chunk) for chunk in chunks]
+			for block
+			in blocks
+	  	][0]
+
+		avg_distance = sum(hamming_distances) / len(hamming_distances)
+		normalized_distance = avg_distance / key_size
+		distances.append((key_size, normalized_distance))
+
+	return sorted(distances, key=operator.itemgetter(1))[0]
 
 
 if __name__ == "__main__":
-	print(hamming(TEST_ONE.encode(), TEST_TWO.encode()))
+	assert hamming_distance("this is a test".encode(), "wokka wokka!!!".encode()) == 37
 
-	with open(FILE, 'rb') as f:
-		edit_distances = []
-		contents = f.read()
-		for key_size in range(2, 41):
+	with open("data/6.txt") as f:
+		contents = b64decode(f.read())
+		key_size = guess_keysize(contents)[0]
+		byte_chunks = split_into_chunks(contents, key_size)
 
-			bytes = int(len(contents) / key_size)
+		transposed_blocks = [b''.join([b[i:i+1] for b in byte_chunks]) for i in range(key_size)]
+		vigenere_key = ''
+		for block in transposed_blocks:
+			single_key, decoded, score = guess_key(block)
+			vigenere_key += chr(single_key)
 
-			sum_distance = 0.0
-			for i in range(bytes-1):
-				edit_distance = hamming(contents[(i*key_size):(i+1)*key_size], contents[(i+1)*key_size:(i+2)*key_size])
-				normalized_distance = edit_distance / key_size
-				sum_distance += normalized_distance
 
-			avg_distance = sum_distance / bytes
-			edit_distances.append((key_size, avg_distance)) 
-
-		min_distances = sorted(edit_distances, key=operator.itemgetter(1))
-		print(min_distances)
-
-		candidate_keys = list(key_size for key_size, distance in min_distances[:9])
-
-		for key in candidate_keys:
-			print(f"KEY: {key}")
-			byte_chunks = [contents[i:i+key] for i in range(0, len(contents), key)]
-
-			transposed_blocks = [b''.join([b[i:i+1] for b in byte_chunks]) for i in range(key)]
-			print(f"NUM BLOCKS {len(transposed_blocks)}")
-			vigenere_key = ''
-			for block in transposed_blocks:
-				single_key, decoded, score = guess_key(block)
-				vigenere_key += chr(single_key)
-
-			print(vigenere_key)
-
-			# for i in range(key):
-			# 	print(b''.join([b[i:i+1] for b in byte_chunks]))
-
+		print(f"KEY: {vigenere_key}")
 
 
 

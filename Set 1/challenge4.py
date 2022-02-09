@@ -13,7 +13,6 @@ import operator
 import string
 from challenge3 import guess_key
 
-STRINGS_FILE = "strings.txt"
 
 def get_best_fit(lines):
 	current_best_fit = None
@@ -30,9 +29,8 @@ def get_best_fit(lines):
 
 
 if __name__ == "__main__":
-	with open(STRINGS_FILE) as f:
+	with open("data/4.txt") as f:
  		lines = [bytes.fromhex(line.strip()) for line in f]
  		key, decoded, score = get_best_fit(lines)
-
 
 	print(f"KEY: {chr(key)}\nPLAINTEXT: {decoded}\nSCORE: {score}\n")
