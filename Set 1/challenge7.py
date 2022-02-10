@@ -1,7 +1,6 @@
 """
 cryptopals.challenge_one.seven
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Base64-encoded content in this file has been encrypted via AES-128 in ECB mode under the key
 
@@ -15,21 +14,23 @@ Decrypt it. You know the key, after all.
 Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher.
 
 """
+
+
 from base64 import b64decode
 from Crypto.Cipher import AES
 
 
-KEY = "YELLOW_SUBMARINE"
-
-
-def decrypt(ciphertext, outfile):
-	alg = AES.new(KEY, AES.MODE_ECB)
-	ciphertext = alg.decrypt()
-	print(ciphertext.decode())
+def aes_ecb_dec(key: bytes, ciphertext: bytes) -> bytes:
+	algorithm = AES.new(key, AES.MODE_ECB)
+	return algorithm.decrypt(ciphertext)
 
 
 if __name__ == "__main__":
+    with open("data/7.txt") as f:
+        contents = f.read()
+	
+    ciphertext = b64decode(contents)
+    plaintext = aes_ecb_dec(b'YELLOW SUBMARINE', ciphertext)
 
-	with open("data/7.txt") as f, open("data/7_decrypted") as outfile:
-		contents = b64decode(f.read())
-		decrypt(contents, outfile)
+    print(f"{plaintext=}")
+
